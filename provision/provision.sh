@@ -83,9 +83,7 @@ apt_package_check_list=(
   # trouble with in Linux.
   dos2unix
 
-  # nodejs for use by grunt
   g++
-  nodejs
 
   #Mailcatcher requirement
   libsqlite3-dev
@@ -210,10 +208,6 @@ package_install() {
     echo "Applying Nginx signing key..."
     wget --quiet "http://nginx.org/keys/nginx_signing.key" -O- | apt-key add -
 
-    # Apply the nodejs assigning key
-    apt-key adv --quiet --keyserver "hkp://keyserver.ubuntu.com:80" --recv-key C7917B12 2>&1 | grep "gpg:"
-    apt-key export C7917B12 | apt-key add -
-
     # Update all of the package references before installing anything
     echo "Running apt-get update..."
     apt-get update -y
@@ -228,12 +222,6 @@ package_install() {
 }
 
 tools_install() {
-  # npm
-  #
-  # Make sure we have the latest npm version and the update checker module
-  npm install -g npm
-  npm install -g npm-check-updates
-
   # xdebug
   #
   # XDebug 2.2.3 is provided with the Ubuntu install by default. The PECL
@@ -279,24 +267,6 @@ tools_install() {
     COMPOSER_HOME=/usr/local/src/composer composer -q global require --no-update d11wtq/boris:v1.0.8
     COMPOSER_HOME=/usr/local/src/composer composer -q global config bin-dir /usr/local/bin
     COMPOSER_HOME=/usr/local/src/composer composer global update
-  fi
-
-  # Grunt
-  #
-  # Install or Update Grunt based on current state.  Updates are direct
-  # from NPM
-  if [[ "$(grunt --version)" ]]; then
-    echo "Updating Grunt CLI"
-    npm update -g grunt-cli &>/dev/null
-    npm update -g grunt-sass &>/dev/null
-    npm update -g grunt-cssjanus &>/dev/null
-    npm update -g grunt-rtlcss &>/dev/null
-  else
-    echo "Installing Grunt CLI"
-    npm install -g grunt-cli &>/dev/null
-    npm install -g grunt-sass &>/dev/null
-    npm install -g grunt-cssjanus &>/dev/null
-    npm install -g grunt-rtlcss &>/dev/null
   fi
 
   # Graphviz
@@ -692,10 +662,7 @@ define( 'WP_DEBUG', true );
 PHP
     echo "Installing WordPress develop..."
     noroot wp core install --url=src.wordpress-develop.dev --quiet --title="WordPress Develop" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
-    cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/
-    cd /srv/www/wordpress-develop/
-    echo "Running npm install for the first time, this may take several minutes..."
-    noroot npm install &>/dev/null
+    cp /srv/config/wordpress-config/wp-tests-config.php /srv/www/wordpress-develop/    
   else
     echo "Updating WordPress develop..."
     cd /srv/www/wordpress-develop/
@@ -707,15 +674,7 @@ PHP
       else
         echo "Skip auto git pull on develop.git.wordpress.org since not on master branch"
       fi
-    fi
-    echo "Updating npm packages..."
-    noroot npm install &>/dev/null
-  fi
-
-  if [[ ! -d "/srv/www/wordpress-develop/build" ]]; then
-    echo "Initializing grunt in WordPress develop... This may take a few moments."
-    cd /srv/www/wordpress-develop/
-    grunt
+    fi    
   fi
 }
 
